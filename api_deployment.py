@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template_string
 import joblib
 from scipy.sparse import hstack
 import os
@@ -36,7 +36,7 @@ def home():
     })
 
 # =====================================
-# Health Check Route (VERY IMPORTANT)
+# Health Check Route
 # =====================================
 
 @app.route("/health", methods=["GET"])
@@ -44,16 +44,18 @@ def health():
     if tfidf and nb_model and svm_model:
         return jsonify({"status": "healthy"})
     else:
-        return jsonify({"status": "error", "message": "Models not loaded"}), 500
+        return jsonify({
+            "status": "error",
+            "message": "Models not loaded"
+        }), 500
 
 # =====================================
-# Prediction Route
+# Prediction API (POST ONLY)
 # =====================================
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Check if models loaded
         if not (tfidf and nb_model and svm_model):
             return jsonify({
                 "status": "error",
@@ -62,7 +64,6 @@ def predict():
 
         data = request.get_json()
 
-        # Validate input
         if not data or "email" not in data:
             return jsonify({
                 "status": "error",
@@ -77,29 +78,15 @@ def predict():
                 "message": "Invalid email content"
             }), 400
 
-        # =====================================
-        # Feature Processing
-        # =====================================
-
         text_tfidf = tfidf.transform([text])
         nb_probs = nb_model.predict_proba(text_tfidf)
         hybrid_features = hstack([text_tfidf, nb_probs])
-
-        # =====================================
-        # Prediction
-        # =====================================
 
         prediction = svm_model.predict(hybrid_features)[0]
         decision_score = svm_model.decision_function(hybrid_features)[0]
 
         label = "Spam" if prediction == 1 else "Ham"
-
-        # Normalize confidence (optional but nicer)
         confidence = float(abs(decision_score))
-
-        # =====================================
-        # Response
-        # =====================================
 
         return jsonify({
             "status": "success",
@@ -114,14 +101,59 @@ def predict():
         }), 500
 
 # =====================================
-# Run Server (Render Compatible)
+# SIMPLE WEB INTERFACE (NEW 🔥)
 # =====================================
+
+@app.route("/app", methods=["GET", "POST"])
+def web_app():
+    result = None
+
+    if request.method == "POST":
+        text = request.form.get("email")
+
+        if tfidf and nb_model and svm_model and text:
+            text_tfidf = tfidf.transform([text])
+            nb_probs = nb_model.predict_proba(text_tfidf)
+            hybrid_features = hstack([text_tfidf, nb_probs])
+
+            prediction = svm_model.predict(hybrid_features)[0]
+            result = "Spam" if prediction == 1 else "Ham"
+
+    return render_template_string("""
+        <html>
+        <head>
+            <title>Spam Detection App</title>
+        </head>
+        <body style="font-family: Arial; text-align: center; margin-top: 50px;">
+            <h2>📧 Spam Detection System</h2>
+            
+            <form method="POST">
+                <textarea name="email" rows="5" cols="40" placeholder="Enter email text here..."></textarea><br><br>
+                <button type="submit">Check</button>
+            </form>
+
+            {% if result %}
+                <h3>Prediction: {{ result }}</h3>
+            {% endif %}
+        </body>
+        </html>
+    """, result=result)
+
+# =====================================
+# Test Route
+# =====================================
+
 @app.route("/test", methods=["GET"])
 def test():
     return {
         "message": "API is working correctly 🚀",
         "status": "success"
     }
+
+# =====================================
+# Run Server (Render Compatible)
+# =====================================
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
