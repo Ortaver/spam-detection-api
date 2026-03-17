@@ -1,0 +1,3 @@
+hello
+
+mail transaction failed . partial message is available .

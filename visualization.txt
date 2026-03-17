@@ -1,0 +1,21 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
+# Confusion Matrix for Naive Bayes
+cm_nb = confusion_matrix(y_test, y_pred_nb)
+plt.figure(figsize=(6, 4))
+sns.heatmap(cm_nb, annot=True, fmt='d', cmap='Blues', xticklabels=['Ham', 'Spam'], yticklabels=['Ham', 'Spam'])
+plt.title("Naive Bayes Confusion Matrix")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.show()
+
+# Confusion Matrix for SVM
+cm_svm = confusion_matrix(y_test, y_pred_svm)
+plt.figure(figsize=(6, 4))
+sns.heatmap(cm_svm, annot=True, fmt='d', cmap='Greens', xticklabels=['Ham', 'Spam'], yticklabels=['Ham', 'Spam'])
+plt.title("SVM Confusion Matrix")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.show()

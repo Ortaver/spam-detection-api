@@ -1,0 +1,6 @@
+aspect resources
+
+confirmation :
+rgds ,
+ellen
+x 54099
