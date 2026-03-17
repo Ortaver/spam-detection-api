@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 
 # =====================================
-# Load Trained Models (Safe Loading)
+# Load Trained Models
 # =====================================
 
 MODEL_PATH = "Models"
@@ -50,33 +50,24 @@ def health():
         }), 500
 
 # =====================================
-# Prediction API (POST ONLY)
+# API Prediction Route (POST Only)
 # =====================================
 
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         if not (tfidf and nb_model and svm_model):
-            return jsonify({
-                "status": "error",
-                "message": "Models not available"
-            }), 500
+            return jsonify({"status": "error", "message": "Models not loaded"}), 500
 
         data = request.get_json()
 
         if not data or "email" not in data:
             return jsonify({
                 "status": "error",
-                "message": "Please provide 'email' field in JSON body"
+                "message": "Please send JSON with 'email' field"
             }), 400
 
         text = data["email"]
-
-        if not isinstance(text, str) or len(text.strip()) == 0:
-            return jsonify({
-                "status": "error",
-                "message": "Invalid email content"
-            }), 400
 
         text_tfidf = tfidf.transform([text])
         nb_probs = nb_model.predict_proba(text_tfidf)
@@ -86,12 +77,11 @@ def predict():
         decision_score = svm_model.decision_function(hybrid_features)[0]
 
         label = "Spam" if prediction == 1 else "Ham"
-        confidence = float(abs(decision_score))
 
         return jsonify({
             "status": "success",
             "prediction": label,
-            "confidence_score": confidence
+            "confidence_score": float(abs(decision_score))
         })
 
     except Exception as e:
@@ -101,7 +91,7 @@ def predict():
         }), 500
 
 # =====================================
-# SIMPLE WEB INTERFACE (NEW 🔥)
+# Web Interface Route (Browser App)
 # =====================================
 
 @app.route("/app", methods=["GET", "POST"])
@@ -125,10 +115,11 @@ def web_app():
             <title>Spam Detection App</title>
         </head>
         <body style="font-family: Arial; text-align: center; margin-top: 50px;">
-            <h2>📧 Spam Detection System</h2>
-            
+            <h2>📧 Hybrid NB-SVM Spam Detection</h2>
+
             <form method="POST">
-                <textarea name="email" rows="5" cols="40" placeholder="Enter email text here..."></textarea><br><br>
+                <textarea name="email" rows="6" cols="50"
+                placeholder="Enter email text here..."></textarea><br><br>
                 <button type="submit">Check</button>
             </form>
 
@@ -140,18 +131,7 @@ def web_app():
     """, result=result)
 
 # =====================================
-# Test Route
-# =====================================
-
-@app.route("/test", methods=["GET"])
-def test():
-    return {
-        "message": "API is working correctly 🚀",
-        "status": "success"
-    }
-
-# =====================================
-# Run Server (Render Compatible)
+# Run App (Render Compatible)
 # =====================================
 
 if __name__ == "__main__":
