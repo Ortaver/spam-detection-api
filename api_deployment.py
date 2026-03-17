@@ -116,7 +116,12 @@ def predict():
 # =====================================
 # Run Server (Render Compatible)
 # =====================================
-
+@app.route("/test", methods=["GET"])
+def test():
+    return {
+        "message": "API is working correctly 🚀",
+        "status": "success"
+    }
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
