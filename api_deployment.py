@@ -36,87 +36,58 @@ def home():
 def web_app():
     result = None
     confidence = None
+    error = None
 
     if request.method == "POST":
-        text = request.form.get("email")
+        try:
+            text = request.form.get("email")
 
-        if tfidf and nb_model and svm_model and text:
-            text_tfidf = tfidf.transform([text])
-            nb_probs = nb_model.predict_proba(text_tfidf)
-            hybrid_features = hstack([text_tfidf, nb_probs])
+            if not text:
+                error = "No input provided"
 
-            prediction = svm_model.predict(hybrid_features)[0]
-            decision_score = svm_model.decision_function(hybrid_features)[0]
+            elif not (tfidf and nb_model and svm_model):
+                error = "Models not loaded on server"
 
-            result = "Spam" if prediction == 1 else "Ham"
-            confidence = round(float(abs(decision_score)), 4)
+            else:
+                text_tfidf = tfidf.transform([text])
+                nb_probs = nb_model.predict_proba(text_tfidf)
+                hybrid_features = hstack([text_tfidf, nb_probs])
+
+                prediction = svm_model.predict(hybrid_features)[0]
+                decision_score = svm_model.decision_function(hybrid_features)[0]
+
+                result = "Spam" if prediction == 1 else "Ham"
+                confidence = round(float(abs(decision_score)), 4)
+
+        except Exception as e:
+            error = str(e)
 
     return render_template_string("""
     <html>
     <head>
-        <title>Hybrid Spam Detection</title>
-        <style>
-            body {
-                font-family: Arial;
-                background: linear-gradient(to right, #4e73df, #1cc88a);
-                text-align: center;
-                color: white;
-            }
-            .container {
-                background: white;
-                color: black;
-                width: 50%;
-                margin: auto;
-                margin-top: 80px;
-                padding: 30px;
-                border-radius: 12px;
-                box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
-            }
-            textarea {
-                width: 90%;
-                padding: 10px;
-                border-radius: 8px;
-            }
-            button {
-                padding: 10px 20px;
-                border: none;
-                border-radius: 8px;
-                background-color: #4e73df;
-                color: white;
-                cursor: pointer;
-            }
-            button:hover {
-                background-color: #2e59d9;
-            }
-            #loading {
-                display: none;
-                margin-top: 10px;
-            }
-        </style>
-        <script>
-            function showLoading() {
-                document.getElementById('loading').style.display = 'block';
-            }
-        </script>
+        <title>Spam Detection</title>
     </head>
-    <body>
-        <div class="container">
-            <h2>📧 Hybrid NB-SVM Spam Detector</h2>
-            <form method="POST" onsubmit="showLoading()">
-                <textarea name="email" rows="6" placeholder="Enter email text..."></textarea><br><br>
-                <button type="submit">Check</button>
-            </form>
+    <body style="font-family: Arial; text-align: center; margin-top: 50px;">
 
-            <div id="loading">⏳ Analyzing... Please wait</div>
+        <h2>📧 Spam Detection System</h2>
 
-            {% if result %}
-                <h3>Prediction: {{ result }}</h3>
-                <h4>Confidence Score: {{ confidence }}</h4>
-            {% endif %}
-        </div>
+        <form method="POST">
+            <textarea name="email" rows="6" cols="50" placeholder="Enter email text..."></textarea><br><br>
+            <button type="submit">Check</button>
+        </form>
+
+        {% if result %}
+            <h3>Prediction: {{ result }}</h3>
+            <h4>Confidence: {{ confidence }}</h4>
+        {% endif %}
+
+        {% if error %}
+            <h3 style="color:red;">Error: {{ error }}</h3>
+        {% endif %}
+
     </body>
     </html>
-    """, result=result, confidence=confidence)
+    """, result=result, confidence=confidence, error=error)
 
 # =============================
 # Run App
