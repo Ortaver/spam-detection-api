@@ -10,7 +10,7 @@ app = Flask(__name__)
 # Load Models
 # =============================
 
-MODEL_PATH = os.path.join(os.getcwd(), "Models")
+MODEL_PATH = os.path.join(os.getcwd(), "models")
 
 print("Current working directory:", os.getcwd())
 print("Looking for models in:", MODEL_PATH)
