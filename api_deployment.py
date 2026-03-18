@@ -9,8 +9,9 @@ app = Flask(__name__)
 # Load Models
 # =============================
 
-MODEL_PATH = "Models"
-
+MODEL_PATH = os.path.join(os.getcwd(), "Models")
+print("Current working directory:", os.getcwd())
+print("Looking for models in:", MODEL_PATH)
 try:
     tfidf = joblib.load(os.path.join(MODEL_PATH, "hybrid_tfidf.pkl"))
     nb_model = joblib.load(os.path.join(MODEL_PATH, "hybrid_nb.pkl"))
