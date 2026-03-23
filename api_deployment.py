@@ -158,10 +158,7 @@ def web_app():
             <h2>📧 Hybrid NB-SVM Spam Detector</h2>
 
             <form method="POST" onsubmit="showLoading()">
-                <textarea id="emailBox" name="email" rows="6" placeholder="Enter email text..."></textarea><br><br>
-
-                <button type="button" onclick="fillSpam()">📩 Try Spam Example</button>
-                <button type="button" onclick="fillHam()">📧 Try Ham Example</button><br><br>
+                <textarea name="email" rows="6" placeholder="Enter email text..."></textarea><br><br>
 
                 <button type="submit">Check</button>
             </form>
