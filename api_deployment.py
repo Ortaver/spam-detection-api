@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template_string
 import joblib
 from scipy.sparse import hstack
 import os
-import math
 
 app = Flask(__name__)
 
@@ -36,14 +35,12 @@ def home():
     })
 
 # =============================
-# Web Application (Upgraded UI)
+# Web Application (Updated UI)
 # =============================
 
 @app.route("/app", methods=["GET", "POST"])
 def web_app():
     result = None
-    confidence = None
-    percent = None
     error = None
 
     if request.method == "POST":
@@ -62,14 +59,8 @@ def web_app():
                 hybrid_features = hstack([text_tfidf, nb_probs])
 
                 prediction = svm_model.predict(hybrid_features)[0]
-                decision_score = svm_model.decision_function(hybrid_features)[0]
 
                 result = "Spam" if prediction == 1 else "Ham"
-                confidence = round(float(abs(decision_score)), 4)
-
-                # Convert to percentage
-                prob = 1 / (1 + math.exp(-decision_score))
-                percent = round(prob * 100, 2)
 
         except Exception as e:
             error = str(e)
@@ -154,15 +145,16 @@ def web_app():
 
             {% if result %}
                 <div class="result {{ 'spam' if result == 'Spam' else 'ham' }}">
-                    Prediction: {{ result }}
+                    {% if result == "Spam" %}
+                        ⚠️ This email is classified as Spam
+                    {% else %}
+                        ✅ This email is classified as Not Spam
+                    {% endif %}
                 </div>
-
-                <p>Confidence Score: {{ confidence }}</p>
-                <p>Confidence: {{ percent }}%</p>
 
                 <div class="bar">
                     <div class="fill"
-                         style="width: {{ percent }}%; background: {{ 'red' if result == 'Spam' else 'green' }};">
+                         style="width: 100%; background: {{ 'red' if result == 'Spam' else 'green' }};">
                     </div>
                 </div>
             {% endif %}
@@ -173,7 +165,7 @@ def web_app():
         </div>
     </body>
     </html>
-    """, result=result, confidence=confidence, percent=percent, error=error)
+    """, result=result, error=error)
 
 # =============================
 # Run App
