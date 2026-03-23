@@ -35,13 +35,14 @@ def home():
     })
 
 # =============================
-# Web Application (Updated UI)
+# Web App
 # =============================
 
 @app.route("/app", methods=["GET", "POST"])
 def web_app():
     result = None
     error = None
+    text = None
 
     if request.method == "POST":
         try:
@@ -59,7 +60,6 @@ def web_app():
                 hybrid_features = hstack([text_tfidf, nb_probs])
 
                 prediction = svm_model.predict(hybrid_features)[0]
-
                 result = "Spam" if prediction == 1 else "Ham"
 
         except Exception as e:
@@ -69,6 +69,7 @@ def web_app():
     <html>
     <head>
         <title>Spam Detection App</title>
+
         <style>
             body {
                 font-family: Arial;
@@ -76,6 +77,7 @@ def web_app():
                 text-align: center;
                 color: white;
             }
+
             .container {
                 background: white;
                 color: black;
@@ -86,39 +88,48 @@ def web_app():
                 border-radius: 12px;
                 box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
             }
+
             textarea {
                 width: 90%;
                 padding: 10px;
                 border-radius: 8px;
             }
+
             button {
-                padding: 10px 20px;
+                padding: 10px 15px;
                 border: none;
                 border-radius: 8px;
+                margin: 5px;
                 background-color: #4e73df;
                 color: white;
                 cursor: pointer;
             }
+
             button:hover {
                 background-color: #2e59d9;
             }
+
             #loading {
                 display: none;
                 margin-top: 10px;
             }
+
             .result {
                 margin-top: 20px;
                 font-size: 20px;
                 font-weight: bold;
             }
+
             .spam { color: red; }
             .ham { color: green; }
+
             .bar {
                 width: 100%;
                 background: #ddd;
                 border-radius: 10px;
                 margin-top: 10px;
             }
+
             .fill {
                 height: 20px;
                 border-radius: 10px;
@@ -129,6 +140,16 @@ def web_app():
             function showLoading() {
                 document.getElementById('loading').style.display = 'block';
             }
+
+            function fillSpam() {
+                document.getElementById('emailBox').value =
+                "Congratulations! You have won a free iPhone. Click here now to claim your prize.";
+            }
+
+            function fillHam() {
+                document.getElementById('emailBox').value =
+                "Dear Richard, please remember our meeting tomorrow at 10am. Regards.";
+            }
         </script>
     </head>
 
@@ -137,7 +158,11 @@ def web_app():
             <h2>📧 Hybrid NB-SVM Spam Detector</h2>
 
             <form method="POST" onsubmit="showLoading()">
-                <textarea name="email" rows="6" placeholder="Enter email text..."></textarea><br><br>
+                <textarea id="emailBox" name="email" rows="6" placeholder="Enter email text..."></textarea><br><br>
+
+                <button type="button" onclick="fillSpam()">📩 Try Spam Example</button>
+                <button type="button" onclick="fillHam()">📧 Try Ham Example</button><br><br>
+
                 <button type="submit">Check</button>
             </form>
 
@@ -150,6 +175,13 @@ def web_app():
                     {% else %}
                         ✅ This email is classified as Not Spam
                     {% endif %}
+                </div>
+
+                <div style="margin-top:15px;">
+                    <strong>Message:</strong>
+                    <p style="background:#f8f9fa; padding:10px; border-radius:8px;">
+                        {{ text }}
+                    </p>
                 </div>
 
                 <div class="bar">
@@ -165,7 +197,7 @@ def web_app():
         </div>
     </body>
     </html>
-    """, result=result, error=error)
+    """, result=result, error=error, text=text)
 
 # =============================
 # Run App
