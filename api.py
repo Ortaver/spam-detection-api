@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import nltk
+import traceback
 nltk.download('wordnet', quiet=True)
 nltk.download('stopwords', quiet=True)
 nltk.download('omw-1.4', quiet=True)
@@ -81,7 +82,10 @@ def predict():
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
 
 
 if __name__ == "__main__":
