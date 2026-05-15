@@ -1,0 +1,14 @@
+=== Computational Efficiency ===
+
+Naive Bayes:
+ Train: 0.0369s | Predict: 0.0090s | Memory: 1.76MB
+
+SVM:
+ Train: 0.7652s | Predict: 0.0080s | Memory: 1.33MB
+
+Hybrid (Base):
+ Train: 0.3815s | Predict: 0.0030s | Memory: 1.33MB
+
+Hybrid (Optimized):
+ Train: 0.2064s | Predict: 0.0020s | Memory: 1.33MB
+

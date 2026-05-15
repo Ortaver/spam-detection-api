@@ -1,0 +1,93 @@
+import numpy as np
+import time
+import os
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+
+
+def find_best_threshold(y_true, scores):
+    """
+    Finds the threshold that maximizes precision (reduces false positives)
+    """
+    thresholds = np.linspace(scores.min(), scores.max(), 100)
+    best_threshold = 0
+    best_precision = 0
+
+    for t in thresholds:
+        preds = (scores >= t).astype(int)
+        prec = precision_score(y_true, preds, zero_division=0)
+
+        if prec > best_precision:
+            best_precision = prec
+            best_threshold = t
+
+    return best_threshold
+
+
+def evaluate_model(name, model, X_test, y_test, use_threshold=True):
+    start = time.time()
+
+    # Use decision scores instead of direct prediction
+    if use_threshold and hasattr(model, "decision_function"):
+        scores = model.decision_function(X_test)
+
+        # Find optimal threshold
+        threshold = find_best_threshold(y_test, scores)
+
+        y_pred = (scores >= threshold).astype(int)
+    else:
+        y_pred = model.predict(X_test)
+        threshold = None
+
+    pred_time = time.time() - start
+
+    # Metrics
+    acc = accuracy_score(y_test, y_pred)
+    prec = precision_score(y_test, y_pred)
+    rec = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+
+    print(f"\n{name} Results")
+
+    print(f"Accuracy : {acc:.4f}")
+    print(f"Precision: {prec:.4f}")
+    print(f"Recall   : {rec:.4f}")
+    print(f"F1-score : {f1:.4f}")
+
+    print("\nPercentage Format:")
+    print(f"Accuracy : {acc*100:.2f}%")
+    print(f"Precision: {prec*100:.2f}%")
+    print(f"Recall   : {rec*100:.2f}%")
+    print(f"F1-score : {f1*100:.2f}%")
+
+    cm = confusion_matrix(y_test, y_pred)
+
+    print("\nConfusion Matrix:")
+    print(cm)
+
+    tn, fp, fn, tp = cm.ravel()
+
+    print("\nError Analysis:")
+    print(f"False Positives (FP): {fp}")
+    print(f"False Negatives (FN): {fn}")
+
+    if threshold is not None:
+        print(f"\nOptimal Decision Threshold: {threshold:.4f}")
+
+    # Save results
+    os.makedirs("results", exist_ok=True)
+
+    with open(f"results/{name}_metrics.txt", "w") as f:
+        f.write(
+            f"Accuracy: {acc:.4f}\n"
+            f"Precision: {prec:.4f}\n"
+            f"Recall: {rec:.4f}\n"
+            f"F1-score: {f1:.4f}\n"
+            f"\nAccuracy(%): {acc*100:.2f}\n"
+            f"Precision(%): {prec*100:.2f}\n"
+            f"Recall(%): {rec*100:.2f}\n"
+            f"F1-score(%): {f1*100:.2f}\n"
+            f"\nConfusion Matrix:\n{cm}\n"
+            f"\nFP: {fp}, FN: {fn}\n"
+        )
+
+    return pred_time

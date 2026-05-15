@@ -1,0 +1,15 @@
+Accuracy: 0.9920
+Precision: 0.9868
+Recall: 0.9977
+F1-score: 0.9922
+
+Accuracy(%): 99.20
+Precision(%): 98.68
+Recall(%): 99.77
+F1-score(%): 99.22
+
+Confusion Matrix:
+[[3263   46]
+ [   8 3427]]
+
+FP: 46, FN: 8
