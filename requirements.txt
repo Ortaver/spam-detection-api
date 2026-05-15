@@ -1,7 +1,8 @@
-flask
 scikit-learn
 pandas
 numpy
 scipy
-joblib
+flask
 nltk
+gunicorn
+joblib
