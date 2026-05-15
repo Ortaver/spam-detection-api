@@ -133,3 +133,14 @@ def extract_features(texts, labels):
     print(f"Feature matrix shape — Train: {X_train.shape}, Test: {X_test.shape}")
 
     return X_train, X_test, y_train, y_test, (word_vec, char_vec, selector)
+
+def save_pipeline(word_vec, char_vec, selector, path="models/tfidf.pkl"):
+    import joblib
+    import os
+    os.makedirs("models", exist_ok=True)
+    joblib.dump({
+        'word_vec': word_vec,
+        'char_vec': char_vec,
+        'selector': selector
+    }, path)
+    print(f"Pipeline saved to {path}")

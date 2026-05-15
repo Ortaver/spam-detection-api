@@ -1,9 +1,10 @@
 from src.data_loader import load_data
-from src.preprocess import extract_features
+from src.preprocess import extract_features, save_pipeline
 from src.train_models import train_nb, train_svm
 from src.hybrid_model import build_hybrid_features
 from src.optimize import optimize_svm
 from src.evaluate import evaluate_model, run_mcnemar_tests
+import joblib
 
 def main():
     print("Loading data...")
@@ -11,6 +12,10 @@ def main():
 
     print("Extracting features...")
     X_train, X_test, y_train, y_test, vecs = extract_features(texts, labels)
+    word_vec, char_vec, selector = vecs
+
+    # Save pipeline immediately after fitting
+    save_pipeline(word_vec, char_vec, selector)
 
     print("Training NB...")
     nb = train_nb(X_train, y_train)
@@ -26,6 +31,11 @@ def main():
 
     print("Optimizing Hybrid...")
     optimized, params = optimize_svm(X_train_hybrid, y_train)
+
+    # Save NB and optimized SVM models
+    joblib.dump(nb, "models/nb.pkl")
+    joblib.dump(optimized, "models/svm_hybrid.pkl")
+    print("Models saved.")
 
     print("\n--- Evaluation ---")
     evaluate_model("Naive_Bayes", nb, X_test, y_test)
