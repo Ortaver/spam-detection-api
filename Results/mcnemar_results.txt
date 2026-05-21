@@ -1,6 +1,7 @@
 McNemar's Test Results
 ============================================================
-Naive_Bayes vs SVM: chi2=15.2100, p=0.0001, SIGNIFICANT
-SVM vs Hybrid_Base: chi2=4.6944, p=0.0303, SIGNIFICANT
-Hybrid_Base vs Optimized_Hybrid: chi2=6.0000, p=1.0000, NOT significant
-Naive_Bayes vs Optimized_Hybrid: chi2=33.4405, p=0.0000, SIGNIFICANT
+Naive_Bayes vs SVM: chi2=15.8438, p=0.0001, a=6607, b=28, c=68, d=41, SIGNIFICANT
+SVM vs Hybrid_Base: chi2=2.8571, p=0.0910, a=6663, b=12, c=23, d=46, NOT significant
+Hybrid_Base vs Optimized_Hybrid: chi2=6.0000, p=0.7905, a=6680, b=6, c=8, d=50, NOT significant
+Naive_Bayes vs Optimized_Hybrid: chi2=31.8118, p=0.0000, a=6619, b=16, c=69, d=40, SIGNIFICANT
+SVM vs Optimized_Hybrid: chi2=3.6923, p=0.0547, a=6662, b=13, c=26, d=43, NOT significant
