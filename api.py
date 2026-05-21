@@ -8,6 +8,7 @@ import joblib
 import numpy as np
 from scipy.sparse import hstack, csr_matrix
 import traceback
+from src.preprocess import clean_text
 
 app = Flask(__name__)
 
@@ -179,7 +180,7 @@ HTML = """
 <body>
     <div class="container">
         <div class="header">
-            <div class="badge">MSc Research — JSTU Makurdi 2026</div>
+            <div class="badge">JOSTUM 2026</div>
             <h1>🛡️ Spam Email Detector</h1>
             <p>Feature-Level Hybrid Naïve Bayes–SVM Model</p>
         </div>
@@ -270,8 +271,10 @@ HTML = """
 """
 
 def preprocess_for_api(email_text):
-    X_word = word_vec.transform([email_text])
-    X_char = char_vec.transform([email_text])
+    # Apply full text cleaning pipeline before vectorisation
+    cleaned_text = clean_text(email_text)
+    X_word = word_vec.transform([cleaned_text])
+    X_char = char_vec.transform([cleaned_text])
     X = hstack([X_word, X_char])
     X = selector.transform(X)
     return X
